@@ -258,10 +258,20 @@ body {
   box-shadow: var(--shadow);
 }
 
+.ts-wrapper .ts-dropdown-content {
+  background: var(--card-strong);
+}
+
 .ts-wrapper .ts-dropdown .option.active,
 .ts-wrapper .ts-dropdown .option:hover {
   background: rgba(94, 234, 212, 0.16);
   color: var(--text-0);
+}
+
+.ts-wrapper .ts-dropdown .option,
+.ts-wrapper .ts-dropdown .create,
+.ts-wrapper .ts-dropdown .no-results {
+  background: var(--card-strong);
 }
 
 .ts-wrapper .ts-control .item {
