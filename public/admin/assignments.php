@@ -33,7 +33,16 @@ $users = array_filter(user_all(), function ($user) {
     return $user['role'] === 'responsable' && (int)$user['active'] === 1;
 });
 
-$assignments = assignment_all();
+$page = (int)($_GET['page'] ?? 1);
+$page = $page > 0 ? $page : 1;
+$per_page = 15;
+$total = assignment_count();
+$total_pages = max(1, (int)ceil($total / $per_page));
+if ($page > $total_pages) {
+    $page = $total_pages;
+}
+$offset = ($page - 1) * $per_page;
+$assignments = assignment_paginated($per_page, $offset);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -128,6 +137,23 @@ $assignments = assignment_all();
                     </tbody>
                 </table>
             </div>
+            <?php if ($total_pages > 1): ?>
+                <nav class="mt-3" aria-label="Paginacion de asignaciones">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                            <a class="page-link" href="?page=<?php echo $page - 1; ?>">Anterior</a>
+                        </li>
+                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                            <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                                <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                            </li>
+                        <?php endfor; ?>
+                        <li class="page-item <?php echo $page >= $total_pages ? 'disabled' : ''; ?>">
+                            <a class="page-link" href="?page=<?php echo $page + 1; ?>">Siguiente</a>
+                        </li>
+                    </ul>
+                </nav>
+            <?php endif; ?>
         </section>
     </main>
 </body>

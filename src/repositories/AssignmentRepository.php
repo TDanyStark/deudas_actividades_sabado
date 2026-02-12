@@ -6,8 +6,30 @@ function assignment_all(): array
         'SELECT a.*, u.name AS user_name, u.email AS user_email '
         . 'FROM assignments a '
         . 'JOIN users u ON u.id = a.user_id '
-        . 'ORDER BY a.activity_date DESC'
+        . 'ORDER BY a.created_at DESC, a.id DESC'
     );
+    return $stmt->fetchAll();
+}
+
+function assignment_count(): int
+{
+    $stmt = db()->query('SELECT COUNT(*) AS total FROM assignments');
+    $row = $stmt->fetch();
+    return $row ? (int)$row['total'] : 0;
+}
+
+function assignment_paginated(int $limit, int $offset): array
+{
+    $sql = 'SELECT a.*, u.name AS user_name, u.email AS user_email '
+        . 'FROM assignments a '
+        . 'JOIN users u ON u.id = a.user_id '
+        . 'ORDER BY a.created_at DESC, a.id DESC '
+        . 'LIMIT :limit OFFSET :offset';
+
+    $stmt = db()->prepare($sql);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     return $stmt->fetchAll();
 }
 

@@ -36,6 +36,56 @@ if (is_post()) {
         }
     }
 
+    if ($action === 'create_debt') {
+        $activity_id = (int)($_POST['activity_id'] ?? 0);
+        $name = trim($_POST['debtor_name'] ?? '');
+        $units = $_POST['units'] ?? '';
+        $units = $units === '' ? null : (int)$units;
+        $unit_value = $_POST['unit_value'] ?? '';
+        $unit_value = $unit_value === '' ? null : (float)$unit_value;
+        $amount = $_POST['amount'] ?? '';
+        $amount = $amount === '' ? null : (float)$amount;
+        $note = trim($_POST['note'] ?? '');
+        $note = $note === '' ? null : $note;
+        $errors = [];
+
+        if (!$activity_id) {
+            $errors[] = 'Selecciona una actividad valida.';
+        }
+
+        if (!$name) {
+            $errors[] = 'Ingresa un nombre.';
+        }
+
+        $activity = $activity_id ? activity_get($activity_id) : null;
+        $activity_unit_value = $activity && $activity['total_value'] !== null ? (float)$activity['total_value'] : null;
+
+        if ($unit_value !== null || $activity_unit_value !== null) {
+            if (!$units || $units <= 0) {
+                $errors[] = 'Ingresa unidades validas.';
+            }
+        } else {
+            if ($amount === null || $amount <= 0) {
+                $errors[] = 'Ingresa un valor valido.';
+            }
+        }
+
+        if (!$errors) {
+            if ($unit_value !== null) {
+                $amount = $units * $unit_value;
+            } elseif ($activity_unit_value !== null) {
+                $amount = $units * $activity_unit_value;
+            }
+        }
+
+        if (!$errors && $amount !== null && $amount > 0) {
+            debtor_create($activity_id, $name, $units, $amount, $note);
+            $notice = 'Deuda registrada.';
+        } elseif ($errors) {
+            $notice = implode(' ', $errors);
+        }
+    }
+
     if ($action === 'settle_all') {
         $rows = debts_public_list();
         foreach ($rows as $row) {
@@ -54,6 +104,11 @@ $filters = [
 ];
 
 $activities = activity_list();
+$debtor_names = debtor_names();
+$activity_unit_values = [];
+foreach ($activities as $activity) {
+    $activity_unit_values[(int)$activity['id']] = $activity['total_value'] === null ? null : (float)$activity['total_value'];
+}
 $debts = debts_public_list($filters);
 ?>
 <!DOCTYPE html>
@@ -85,6 +140,53 @@ $debts = debts_public_list($filters);
         <?php if ($notice): ?>
             <div class="alert alert-success mb-4" role="alert"><?php echo h($notice); ?></div>
         <?php endif; ?>
+
+        <section class="app-card mb-4">
+            <h2 class="section-title">Crear deuda (admin)</h2>
+            <form method="post" class="row g-3" data-activity-unit-values='<?php echo h(json_encode($activity_unit_values)); ?>'>
+                <?php echo csrf_field(); ?>
+                <input type="hidden" name="action" value="create_debt">
+                <div class="col-md-4">
+                    <label class="form-label">Actividad</label>
+                    <input type="text" name="activity_id" list="activity-options" class="form-control" required placeholder="Escribe para buscar">
+                    <datalist id="activity-options">
+                        <?php foreach ($activities as $activity): ?>
+                            <option value="<?php echo (int)$activity['id']; ?>" label="<?php echo h($activity['activity_date']); ?> — <?php echo h($activity['description']); ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                    <div class="form-text">Selecciona por fecha y nombre. Se guarda el ID.</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Deudor</label>
+                    <input type="text" name="debtor_name" list="debtor-names" class="form-control" required>
+                    <datalist id="debtor-names">
+                        <?php foreach ($debtor_names as $row): ?>
+                            <option value="<?php echo h($row['debtor_name']); ?>"></option>
+                        <?php endforeach; ?>
+                    </datalist>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Unidades</label>
+                    <input type="number" name="units" min="1" class="form-control" placeholder="0">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Valor por unidad (opcional)</label>
+                    <input type="number" step="0.01" name="unit_value" class="form-control" placeholder="Ej: 2.50">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Total</label>
+                    <input type="number" step="0.01" name="amount" class="form-control" required>
+                    <div class="form-text">Se calcula con unidades o se ingresa manualmente si no hay valor de actividad.</div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Nota (opcional)</label>
+                    <input type="text" name="note" class="form-control">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Registrar deuda</button>
+                </div>
+            </form>
+        </section>
 
         <section class="app-card mb-4">
             <h2 class="section-title">Filtros</h2>
@@ -169,5 +271,66 @@ $debts = debts_public_list($filters);
             </div>
         </section>
     </main>
+    <script>
+        (function () {
+            var form = document.querySelector('form[data-activity-unit-values]');
+            if (!form) {
+                return;
+            }
+            var activityInput = form.querySelector('input[name="activity_id"]');
+            var unitsInput = form.querySelector('input[name="units"]');
+            var unitValueInput = form.querySelector('input[name="unit_value"]');
+            var amountInput = form.querySelector('input[name="amount"]');
+            var activityUnitValues = {};
+
+            try {
+                activityUnitValues = JSON.parse(form.dataset.activityUnitValues || '{}');
+            } catch (e) {
+                activityUnitValues = {};
+            }
+
+            function toNumber(value) {
+                var parsed = parseFloat(value);
+                return Number.isFinite(parsed) ? parsed : null;
+            }
+
+            function getActivityUnitValue() {
+                var activityId = parseInt(activityInput.value, 10);
+                if (!Number.isFinite(activityId)) {
+                    return null;
+                }
+                var value = activityUnitValues[activityId];
+                return typeof value === 'number' ? value : null;
+            }
+
+            function recalc() {
+                var units = toNumber(unitsInput.value);
+                var unitValue = toNumber(unitValueInput.value);
+                var activityValue = getActivityUnitValue();
+                var total = null;
+
+                if (unitValue !== null && units !== null && units > 0) {
+                    total = units * unitValue;
+                } else if (activityValue !== null && units !== null && units > 0) {
+                    total = units * activityValue;
+                }
+
+                unitsInput.required = unitValue !== null || activityValue !== null;
+                amountInput.readOnly = unitValue !== null || activityValue !== null;
+                amountInput.required = unitValue === null && activityValue === null;
+
+                if (total !== null) {
+                    amountInput.value = total.toFixed(2);
+                } else if (amountInput.readOnly) {
+                    amountInput.value = '';
+                }
+            }
+
+            activityInput.addEventListener('input', recalc);
+            unitsInput.addEventListener('input', recalc);
+            unitValueInput.addEventListener('input', recalc);
+            recalc();
+        })();
+    </script>
 </body>
 </html>

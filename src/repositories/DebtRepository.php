@@ -52,10 +52,20 @@ function debts_public_list(array $filters = []): array
         $sql .= 'WHERE ' . implode(' AND ', $where) . ' ';
     }
 
-    $sql .= 'GROUP BY d.id ORDER BY asg.activity_date DESC, d.debtor_name ASC';
+    $sql .= 'GROUP BY d.id ORDER BY d.created_at DESC, d.id DESC';
 
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
+    return $stmt->fetchAll();
+}
+
+function debtor_names(): array
+{
+    $stmt = db()->query(
+        'SELECT DISTINCT debtor_name '
+        . 'FROM debtors '
+        . 'ORDER BY debtor_name ASC'
+    );
     return $stmt->fetchAll();
 }
 
@@ -64,11 +74,12 @@ function debts_summary_by_name(): array
     $stmt = db()->query(
         'SELECT d.debtor_name, '
         . 'SUM(d.amount) AS total_amount, '
-        . 'COALESCE(SUM(p.paid_amount), 0) AS paid_total '
+        . 'COALESCE(SUM(p.paid_amount), 0) AS paid_total, '
+        . 'MAX(d.created_at) AS last_created '
         . 'FROM debtors d '
         . 'LEFT JOIN payments p ON p.debtor_id = d.id '
         . 'GROUP BY d.debtor_name '
-        . 'ORDER BY d.debtor_name ASC'
+        . 'ORDER BY last_created DESC'
     );
     return $stmt->fetchAll();
 }
@@ -81,7 +92,7 @@ function debtors_by_activity(int $activity_id): array
         . 'LEFT JOIN payments p ON p.debtor_id = d.id '
         . 'WHERE d.activity_id = ? '
         . 'GROUP BY d.id '
-        . 'ORDER BY d.debtor_name ASC'
+        . 'ORDER BY d.created_at DESC, d.id DESC'
     );
     $stmt->execute([$activity_id]);
     return $stmt->fetchAll();

@@ -10,7 +10,7 @@ function user_find_by_email(string $email): ?array
 
 function user_all(): array
 {
-    $stmt = db()->query('SELECT * FROM users ORDER BY active DESC, name ASC');
+    $stmt = db()->query('SELECT * FROM users ORDER BY created_at DESC, id DESC');
     return $stmt->fetchAll();
 }
 
