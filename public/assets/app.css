@@ -222,3 +222,50 @@ body {
     padding: 24px 16px 48px;
   }
 }
+
+.ts-wrapper {
+  width: 100%;
+}
+
+.ts-control,
+.ts-dropdown,
+.ts-dropdown .option,
+.ts-dropdown .no-results,
+.ts-dropdown .create,
+.ts-control input {
+  color: var(--text-0);
+}
+
+.ts-control {
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  min-height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  box-shadow: none;
+}
+
+.ts-control.focus {
+  border-color: rgba(94, 234, 212, 0.6);
+  box-shadow: 0 0 0 0.2rem rgba(94, 234, 212, 0.2);
+}
+
+.ts-dropdown {
+  background: var(--card-strong);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow);
+}
+
+.ts-dropdown .option.active,
+.ts-dropdown .option:hover {
+  background: rgba(94, 234, 212, 0.16);
+  color: var(--text-0);
+}
+
+.ts-control .item {
+  background: rgba(94, 234, 212, 0.2);
+  color: var(--text-0);
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+}

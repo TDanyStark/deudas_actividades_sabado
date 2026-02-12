@@ -121,6 +121,7 @@ $debts = debts_public_list($filters);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <link href="<?php echo url('/assets/app.css'); ?>" rel="stylesheet">
 </head>
 <body>
@@ -148,22 +149,24 @@ $debts = debts_public_list($filters);
                 <input type="hidden" name="action" value="create_debt">
                 <div class="col-md-4">
                     <label class="form-label">Actividad</label>
-                    <input type="text" name="activity_id" list="activity-options" class="form-control" required placeholder="Escribe para buscar">
-                    <datalist id="activity-options">
+                    <select name="activity_id" class="form-select js-activity-select" required>
+                        <option value="">Selecciona una actividad</option>
                         <?php foreach ($activities as $activity): ?>
-                            <option value="<?php echo (int)$activity['id']; ?>" label="<?php echo h($activity['activity_date']); ?> — <?php echo h($activity['description']); ?>"></option>
+                            <option value="<?php echo (int)$activity['id']; ?>">
+                                <?php echo h($activity['activity_date']); ?> — <?php echo h($activity['description']); ?>
+                            </option>
                         <?php endforeach; ?>
-                    </datalist>
+                    </select>
                     <div class="form-text">Selecciona por fecha y nombre. Se guarda el ID.</div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Deudor</label>
-                    <input type="text" name="debtor_name" list="debtor-names" class="form-control" required>
-                    <datalist id="debtor-names">
+                    <select name="debtor_name" class="form-select js-debtor-select" required>
+                        <option value="">Escribe o selecciona</option>
                         <?php foreach ($debtor_names as $row): ?>
-                            <option value="<?php echo h($row['debtor_name']); ?>"></option>
+                            <option value="<?php echo h($row['debtor_name']); ?>"><?php echo h($row['debtor_name']); ?></option>
                         <?php endforeach; ?>
-                    </datalist>
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Unidades</label>
@@ -197,7 +200,7 @@ $debts = debts_public_list($filters);
                 </div>
                 <div class="col-md-5">
                     <label class="form-label">Actividad</label>
-                    <select name="activity_id" class="form-select">
+                    <select name="activity_id" class="form-select js-activity-filter-select">
                         <option value="">Todas</option>
                         <?php foreach ($activities as $activity): ?>
                             <option value="<?php echo (int)$activity['id']; ?>" <?php echo $filters['activity_id'] == $activity['id'] ? 'selected' : ''; ?>>
@@ -271,17 +274,46 @@ $debts = debts_public_list($filters);
             </div>
         </section>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <script>
         (function () {
             var form = document.querySelector('form[data-activity-unit-values]');
             if (!form) {
                 return;
             }
-            var activityInput = form.querySelector('input[name="activity_id"]');
+            var activityInput = form.querySelector('select[name="activity_id"]');
             var unitsInput = form.querySelector('input[name="units"]');
             var unitValueInput = form.querySelector('input[name="unit_value"]');
             var amountInput = form.querySelector('input[name="amount"]');
             var activityUnitValues = {};
+
+            var activitySelect = document.querySelector('.js-activity-select');
+            if (activitySelect && !activitySelect.tomselect && window.TomSelect) {
+                new TomSelect(activitySelect, {
+                    create: false,
+                    allowEmptyOption: true,
+                    placeholder: 'Selecciona una actividad'
+                });
+            }
+
+            var debtorSelect = document.querySelector('.js-debtor-select');
+            if (debtorSelect && !debtorSelect.tomselect && window.TomSelect) {
+                new TomSelect(debtorSelect, {
+                    create: true,
+                    persist: false,
+                    allowEmptyOption: true,
+                    placeholder: 'Escribe o selecciona'
+                });
+            }
+
+            var filterSelect = document.querySelector('.js-activity-filter-select');
+            if (filterSelect && !filterSelect.tomselect && window.TomSelect) {
+                new TomSelect(filterSelect, {
+                    create: false,
+                    allowEmptyOption: true,
+                    placeholder: 'Todas'
+                });
+            }
 
             try {
                 activityUnitValues = JSON.parse(form.dataset.activityUnitValues || '{}');
@@ -326,7 +358,7 @@ $debts = debts_public_list($filters);
                 }
             }
 
-            activityInput.addEventListener('input', recalc);
+            activityInput.addEventListener('change', recalc);
             unitsInput.addEventListener('input', recalc);
             unitValueInput.addEventListener('input', recalc);
             recalc();

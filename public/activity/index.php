@@ -161,6 +161,7 @@ $debtor_names = debtor_names();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
     <link href="<?php echo url('/assets/app.css'); ?>" rel="stylesheet">
 </head>
 <body>
@@ -213,12 +214,12 @@ $debtor_names = debtor_names();
                 <input type="hidden" name="action" value="add_debtor">
                 <div class="col-md-4">
                     <label class="form-label">Nombre</label>
-                    <input type="text" name="debtor_name" list="debtor-names" class="form-control" required>
-                    <datalist id="debtor-names">
+                    <select name="debtor_name" class="form-select js-debtor-select" required>
+                        <option value="">Escribe o selecciona</option>
                         <?php foreach ($debtor_names as $row): ?>
-                            <option value="<?php echo h($row['debtor_name']); ?>"></option>
+                            <option value="<?php echo h($row['debtor_name']); ?>"><?php echo h($row['debtor_name']); ?></option>
                         <?php endforeach; ?>
-                    </datalist>
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Unidades</label>
@@ -281,6 +282,7 @@ $debtor_names = debtor_names();
             </div>
         </section>
     </main>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
     <script>
         (function () {
             var form = document.querySelector('form[data-activity-unit-value]');
@@ -292,6 +294,16 @@ $debtor_names = debtor_names();
             var amountInput = form.querySelector('input[name="amount"]');
             var activityUnitValueRaw = form.dataset.activityUnitValue || '';
             var activityUnitValue = parseFloat(activityUnitValueRaw);
+
+            var debtorSelect = document.querySelector('.js-debtor-select');
+            if (debtorSelect && !debtorSelect.tomselect && window.TomSelect) {
+                new TomSelect(debtorSelect, {
+                    create: true,
+                    persist: false,
+                    allowEmptyOption: true,
+                    placeholder: 'Escribe o selecciona'
+                });
+            }
 
             function toNumber(value) {
                 var parsed = parseFloat(value);
