@@ -31,6 +31,9 @@ $summary = debts_summary_by_name();
                 <h1>Deudas publicas</h1>
                 <p class="muted mb-0">Consulta saldos y movimientos por actividad.</p>
             </div>
+            <div>
+                <a class="btn btn-outline-light" href="<?php echo url('/admin/login'); ?>">Acceso admin</a>
+            </div>
         </header>
 
         <section class="app-card mb-4">
