@@ -195,6 +195,12 @@ body {
   color: var(--muted);
 }
 
+.assignment-link {
+  min-width: 320px;
+  resize: none;
+  font-size: 0.85rem;
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;

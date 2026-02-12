@@ -6,6 +6,34 @@ require __DIR__ . '/../../src/repositories/index.php';
 $today = date('Y-m-d');
 $error = '';
 
+function render_access_message(string $message): void
+{
+    $safe_message = h($message);
+    $title = 'Acceso restringido';
+    echo "<!DOCTYPE html>\n";
+    echo "<html lang=\"es\">\n";
+    echo "<head>\n";
+    echo "    <meta charset=\"UTF-8\">\n";
+    echo "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n";
+    echo "    <title>" . $title . "</title>\n";
+    echo "    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n";
+    echo "    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n";
+    echo "    <link href=\"https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Sora:wght@300;400;500;600&display=swap\" rel=\"stylesheet\">\n";
+    echo "    <link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\" integrity=\"sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH\" crossorigin=\"anonymous\">\n";
+    echo "    <link href=\"" . url('/assets/app.css') . "\" rel=\"stylesheet\">\n";
+    echo "</head>\n";
+    echo "<body>\n";
+    echo "    <main class=\"app-shell app-shell--center\">\n";
+    echo "        <section class=\"app-card text-center\">\n";
+    echo "            <h1 class=\"section-title\">" . $title . "</h1>\n";
+    echo "            <p class=\"muted mb-0\">" . $safe_message . "</p>\n";
+    echo "        </section>\n";
+    echo "    </main>\n";
+    echo "</body>\n";
+    echo "</html>\n";
+    exit;
+}
+
 if (!current_user()) {
     $token = $_GET['token'] ?? '';
     if ($token) {
@@ -31,16 +59,14 @@ if (!current_user()) {
 }
 
 if (!current_user()) {
-    echo $error ?: 'Necesitas un link valido para acceder.';
-    exit;
+    render_access_message($error ?: 'Necesitas un link valido para acceder.');
 }
 
 require_responsable();
 
 $user = current_user();
 if (($user['activity_date'] ?? '') !== $today) {
-    echo 'No tienes acceso en este dia.';
-    exit;
+    render_access_message('Solo puedes acceder el dia de la actividad.');
 }
 
 $assignment_id = (int)$user['assignment_id'];

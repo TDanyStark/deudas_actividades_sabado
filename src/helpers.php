@@ -22,5 +22,14 @@ function url(string $path): string
     if ($base === '') {
         return $path;
     }
+    if ($base[0] === '/') {
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        if ($host !== '') {
+            $is_https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+            $scheme = $is_https ? 'https' : 'http';
+            $base = $scheme . '://' . $host . $base;
+        }
+    }
     return rtrim($base, '/') . '/' . ltrim($path, '/');
 }

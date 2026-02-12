@@ -122,7 +122,15 @@ $assignments = assignment_paginated($per_page, $offset);
                                 <td><?php echo h($assignment['user_email']); ?></td>
                                 <td><?php echo h($assignment['token']); ?></td>
                                 <td>
-                                    <input type="text" value="<?php echo h($link); ?>" readonly class="form-control form-control-sm" style="min-width: 240px;">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <textarea readonly rows="2" class="form-control form-control-sm assignment-link"><?php echo h($link); ?></textarea>
+                                        <button type="button" class="btn btn-outline-light btn-sm copy-link" data-link="<?php echo h($link); ?>" aria-label="Copiar link" title="Copiar link">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                                                <path d="M10 1.5A1.5 1.5 0 0 1 11.5 3v7A1.5 1.5 0 0 1 10 11.5H5A1.5 1.5 0 0 1 3.5 10V3A1.5 1.5 0 0 1 5 1.5h5zm0 1H5a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5V3a.5.5 0 0 0-.5-.5z"/>
+                                                <path d="M12.5 4a.5.5 0 0 1 .5.5v7A2.5 2.5 0 0 1 10.5 14h-5a.5.5 0 0 1 0-1h5A1.5 1.5 0 0 0 12 11.5v-7a.5.5 0 0 1 .5-.5z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                                 <td>
                                     <form method="post">
@@ -156,5 +164,55 @@ $assignments = assignment_paginated($per_page, $offset);
             <?php endif; ?>
         </section>
     </main>
+    <script>
+        (function () {
+            function fallbackCopy(text) {
+                var textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'absolute';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    return false;
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+                return true;
+            }
+
+            document.querySelectorAll('.copy-link').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var link = button.dataset.link || '';
+                    if (!link) {
+                        return;
+                    }
+                    var setFeedback = function () {
+                        var originalTitle = button.title;
+                        var originalLabel = button.getAttribute('aria-label');
+                        button.title = 'Copiado';
+                        button.setAttribute('aria-label', 'Copiado');
+                        setTimeout(function () {
+                            button.title = originalTitle;
+                            button.setAttribute('aria-label', originalLabel || 'Copiar link');
+                        }, 1200);
+                    };
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(link).then(setFeedback).catch(function () {
+                            if (fallbackCopy(link)) {
+                                setFeedback();
+                            }
+                        });
+                    } else if (fallbackCopy(link)) {
+                        setFeedback();
+                    }
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
