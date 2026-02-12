@@ -34,8 +34,10 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/csrf.php';
 require_once __DIR__ . '/auth.php';
 
-function app_config(): array
-{
-    global $config;
-    return $config;
+if (!function_exists('app_config')) {
+    function app_config(): array
+    {
+        global $config;
+        return $config;
+    }
 }

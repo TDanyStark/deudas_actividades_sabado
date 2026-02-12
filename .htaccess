@@ -3,15 +3,7 @@
     Require all denied
 </FilesMatch>
 
-<Directory "config">
-    Require all denied
-</Directory>
-<Directory "src">
-    Require all denied
-</Directory>
-<Directory "db">
-    Require all denied
-</Directory>
+RewriteRule ^(config|src|db)/ - [F]
 
 RewriteEngine On
 

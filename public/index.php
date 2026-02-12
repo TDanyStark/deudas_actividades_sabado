@@ -5,9 +5,19 @@ require __DIR__ . '/../src/bootstrap.php';
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $path = rtrim($path, '/') ?: '/';
 
+$base_url = app_config()['app']['base_url'] ?? '';
+$base_path = $base_url !== '' ? (parse_url($base_url, PHP_URL_PATH) ?: '') : '';
+$base_path = rtrim($base_path, '/');
+
+if ($base_path !== '' && str_starts_with($path, $base_path)) {
+    $path = substr($path, strlen($base_path));
+    $path = rtrim($path, '/') ?: '/';
+}
+
 $routes = [
     '/' => __DIR__ . '/public/index.php',
     '/public' => __DIR__ . '/public/index.php',
+    '/public/index.php' => __DIR__ . '/public/index.php',
     '/admin/login' => __DIR__ . '/admin/login.php',
     '/admin/logout' => __DIR__ . '/admin/logout.php',
     '/admin/users' => __DIR__ . '/admin/users.php',
