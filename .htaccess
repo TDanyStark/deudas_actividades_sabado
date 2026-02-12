@@ -1,0 +1,22 @@
+# Block direct access to sensitive files and folders
+<FilesMatch "^\.env$">
+    Require all denied
+</FilesMatch>
+
+<Directory "config">
+    Require all denied
+</Directory>
+<Directory "src">
+    Require all denied
+</Directory>
+<Directory "db">
+    Require all denied
+</Directory>
+
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^ public/index.php [L]
