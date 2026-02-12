@@ -162,6 +162,7 @@ $debts = debts_public_list($filters);
                 <div class="col-md-3">
                     <label class="form-label">Deudor</label>
                     <select name="debtor_name" class="form-select js-debtor-select" required>
+                        <option value="">Selecciona o escribe un deudor</option>
                         <?php foreach ($debtor_names as $row): ?>
                             <option value="<?php echo h($row['debtor_name']); ?>"><?php echo h($row['debtor_name']); ?></option>
                         <?php endforeach; ?>
@@ -301,7 +302,7 @@ $debts = debts_public_list($filters);
                     create: true,
                     persist: false,
                     allowEmptyOption: true,
-                    placeholder: 'Escribe o selecciona'
+                    placeholder: 'Selecciona un deudor'
                 });
             }
 
