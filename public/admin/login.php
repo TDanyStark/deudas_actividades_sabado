@@ -34,8 +34,8 @@ if (is_post()) {
     <link href="<?php echo url('/assets/app.css'); ?>" rel="stylesheet">
 </head>
 <body>
-    <main class="app-shell">
-        <section class="app-card mx-auto" style="max-width: 420px;">
+    <main class="app-shell app-shell--center">
+        <section class="app-card">
             <h1 class="mb-3">Acceso admin</h1>
             <p class="muted mb-4">Ingresa para administrar usuarios, asignaciones y deudas.</p>
 

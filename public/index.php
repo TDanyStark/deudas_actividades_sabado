@@ -14,6 +14,29 @@ if ($base_path !== '' && str_starts_with($path, $base_path)) {
     $path = rtrim($path, '/') ?: '/';
 }
 
+if (str_starts_with($path, '/assets/')) {
+    $asset_base = realpath(__DIR__ . '/assets');
+    $asset_path = realpath(__DIR__ . $path);
+    if ($asset_base && $asset_path && str_starts_with($asset_path, $asset_base) && is_file($asset_path)) {
+        $extension = strtolower(pathinfo($asset_path, PATHINFO_EXTENSION));
+        $mime_map = [
+            'css' => 'text/css',
+            'js' => 'application/javascript',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'svg' => 'image/svg+xml',
+            'woff' => 'font/woff',
+            'woff2' => 'font/woff2',
+        ];
+        if (isset($mime_map[$extension])) {
+            header('Content-Type: ' . $mime_map[$extension]);
+        }
+        readfile($asset_path);
+        exit;
+    }
+}
+
 $routes = [
     '/' => __DIR__ . '/public/index.php',
     '/public' => __DIR__ . '/public/index.php',
