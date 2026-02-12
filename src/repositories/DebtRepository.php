@@ -79,6 +79,7 @@ function debts_summary_by_name(): array
         . 'FROM debtors d '
         . 'LEFT JOIN payments p ON p.debtor_id = d.id '
         . 'GROUP BY d.debtor_name '
+        . 'HAVING (SUM(d.amount) - COALESCE(SUM(p.paid_amount), 0)) > 0 '
         . 'ORDER BY last_created DESC'
     );
     return $stmt->fetchAll();
