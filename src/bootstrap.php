@@ -1,5 +1,26 @@
 <?php
 
+// Simple .env loader for local development.
+$env_path = __DIR__ . '/../.env';
+if (is_readable($env_path)) {
+    $lines = file($env_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || str_starts_with($trimmed, '#')) {
+            continue;
+        }
+        $parts = explode('=', $trimmed, 2);
+        $key = trim($parts[0]);
+        $value = $parts[1] ?? '';
+        $value = trim($value);
+        if ($key !== '' && getenv($key) === false) {
+            putenv($key . '=' . $value);
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+}
+
 $config = require __DIR__ . '/../config/config.php';
 
 date_default_timezone_set($config['app']['timezone']);
