@@ -250,31 +250,31 @@ $debtor_names = debtor_names();
                 <table class="table table-dark table-striped align-middle">
                     <thead>
                         <tr>
+                            <th>Accion</th>
                             <th>Nombre</th>
                             <th>Unidades</th>
                             <th>Valor</th>
                             <th>Pagado</th>
                             <th>Saldo</th>
-                            <th>Accion</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($debtors as $debtor): ?>
                             <?php $remaining = (float)$debtor['amount'] - (float)$debtor['paid_total']; ?>
                             <tr>
-                                <td><?php echo h($debtor['debtor_name']); ?></td>
-                                <td><?php echo h((string)$debtor['units']); ?></td>
-                                <td><?php echo h(number_format((float)$debtor['amount'], 2)); ?></td>
-                                <td><?php echo h(number_format((float)$debtor['paid_total'], 2)); ?></td>
-                                <td><?php echo h(number_format($remaining, 2)); ?></td>
                                 <td>
                                     <form method="post">
                                         <?php echo csrf_field(); ?>
                                         <input type="hidden" name="action" value="settle_debtor">
                                         <input type="hidden" name="debtor_id" value="<?php echo (int)$debtor['id']; ?>">
-                                        <button type="submit" class="btn btn-outline-light btn-sm" <?php echo $remaining <= 0 ? 'disabled' : ''; ?>>Saldar</button>
+                                        <button type="submit" class="btn btn-primary btn-sm" <?php echo $remaining <= 0 ? 'disabled' : ''; ?>>Saldar</button>
                                     </form>
                                 </td>
+                                <td><?php echo h($debtor['debtor_name']); ?></td>
+                                <td><?php echo h((string)$debtor['units']); ?></td>
+                                <td><?php echo h(number_format((float)$debtor['amount'], 2)); ?></td>
+                                <td><?php echo h(number_format((float)$debtor['paid_total'], 2)); ?></td>
+                                <td><?php echo h(number_format($remaining, 2)); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
