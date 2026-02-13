@@ -267,7 +267,9 @@ $debtor_names = debtor_names();
                                         <?php echo csrf_field(); ?>
                                         <input type="hidden" name="action" value="settle_debtor">
                                         <input type="hidden" name="debtor_id" value="<?php echo (int)$debtor['id']; ?>">
-                                        <button type="submit" class="btn btn-primary btn-sm" <?php echo $remaining <= 0 ? 'disabled' : ''; ?>>Saldar</button>
+                                        <button type="submit" class="btn btn-primary btn-sm" <?php echo $remaining <= 0 ? 'disabled' : ''; ?>>
+                                            <?php echo $remaining <= 0 ? 'Saldada' : 'Saldar'; ?>
+                                        </button>
                                     </form>
                                 </td>
                                 <td><?php echo h($debtor['debtor_name']); ?></td>
