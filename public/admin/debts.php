@@ -305,7 +305,7 @@ $debts = debts_public_list($filters);
                     placeholder: 'Selecciona un deudor',
                     render: {
                         option_create: function (data, escape) {
-                            return '<div class="create">Crear <strong>' + escape(data.input) + '</strong>…</div>';
+                            return '<div class="create">Crear <strong>' + escape(data.input) + '</strong></div>';
                         },
                         no_results: function () {
                             return '<div class="no-results">No se ha encontrado</div>';
