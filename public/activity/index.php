@@ -303,7 +303,15 @@ $debtor_names = debtor_names();
                     create: true,
                     persist: false,
                     allowEmptyOption: true,
-                    placeholder: 'Escribe o selecciona'
+                    placeholder: 'Escribe o selecciona',
+                    render: {
+                        option_create: function (data, escape) {
+                            return '<div class="create">Crear <strong>' + escape(data.input) + '</strong></div>';
+                        },
+                        no_results: function () {
+                            return '<div class="no-results">No se ha encontrado</div>';
+                        }
+                    }
                 });
             }
 
